@@ -6,34 +6,38 @@ namespace AVL_tree
     {
         static void Main(string[] args)
         {
-            AVL tree = new AVL();
-            tree.Add(5);
-            tree.Add(3);
-            tree.Add(7);
-            tree.Add(2);
+            AVL<int, string> tree = new AVL<int, string>();
+            tree.Add(5, "a");
+            tree.Add(3, "b");
+            tree.Add(7, "c");
+            tree.Add(2, "d");
+            tree.Add(4, "e");
+            tree.Add(9, "j");
             tree.Delete(7);
             tree.DisplayTree();
         }
     }
-    class AVL
+    class AVL<TKey, TValue> where TKey : System.IComparable, System.IEquatable<TKey>
     {
         class Node
         {
-            public int data;
+            public TKey key;
+            public TValue value;
             public Node left;
             public Node right;
-            public Node(int data)
+            public Node(TKey key, TValue value)
             {
-                this.data = data;
+                this.key = key;
+                this.value = value;
             }
         }
         Node root;
         public AVL()
         {
         }
-        public void Add(int data)
+        public void Add(TKey key, TValue value)
         {
-            Node newItem = new Node(data);
+            Node newItem = new Node(key, value);
             if (root == null)
             {
                 root = newItem;
@@ -43,6 +47,7 @@ namespace AVL_tree
                 root = RecursiveInsert(root, newItem);
             }
         }
+
         private Node RecursiveInsert(Node current, Node n)
         {
             if (current == null)
@@ -50,12 +55,12 @@ namespace AVL_tree
                 current = n;
                 return current;
             }
-            else if (n.data < current.data)
+            else if (n.key.CompareTo(current.key) <= 0)
             {
                 current.left = RecursiveInsert(current.left, n);
                 current = balance_tree(current);
             }
-            else if (n.data > current.data)
+            else if (n.key.CompareTo(current.key) >= 0)
             {
                 current.right = RecursiveInsert(current.right, n);
                 current = balance_tree(current);
@@ -89,11 +94,11 @@ namespace AVL_tree
             }
             return current;
         }
-        public void Delete(int target)
-        {//and here
+        public void Delete(TKey target)
+        {
             root = Delete(root, target);
         }
-        private Node Delete(Node current, int target)
+        private Node Delete(Node current, TKey target)
         {
             Node parent;
             if (current == null)
@@ -101,7 +106,7 @@ namespace AVL_tree
             else
             {
                 //left subtree
-                if (target < current.data)
+                if (target.CompareTo(current.key) < 0)
                 {
                     current.left = Delete(current.left, target);
                     if (balance_factor(current) == -2)//here
@@ -117,7 +122,7 @@ namespace AVL_tree
                     }
                 }
                 //right subtree
-                else if (target > current.data)
+                else if (target.CompareTo(current.key) > 0)
                 {
                     current.right = Delete(current.right, target);
                     if (balance_factor(current) == 2)
@@ -143,8 +148,9 @@ namespace AVL_tree
                         {
                             parent = parent.left;
                         }
-                        current.data = parent.data;
-                        current.right = Delete(current.right, parent.data);
+                        current.key = parent.key;
+                        current.right = Delete(current.right, parent.key);
+                        current.right = Delete(current.right, parent.key);
                         if (balance_factor(current) == 2)//rebalancing
                         {
                             if (balance_factor(current.left) >= 0)
@@ -162,9 +168,9 @@ namespace AVL_tree
             }
             return current;
         }
-        public void Find(int key)
+        public void Find(TKey key)
         {
-            if (Find(key, root).data == key)
+            if (Find(key, root).key.Equals(key))
             {
                 Console.WriteLine("{0} was found!", key);
             }
@@ -173,12 +179,12 @@ namespace AVL_tree
                 Console.WriteLine("Nothing found!");
             }
         }
-        private Node Find(int target, Node current)
+        private Node Find(TKey target, Node current)
         {
 
-            if (target < current.data)
+            if (target.CompareTo(current.key) <= 0)//target < current.key
             {
-                if (target == current.data)
+                if (target.Equals(current.key))
                 {
                     return current;
                 }
@@ -187,7 +193,7 @@ namespace AVL_tree
             }
             else
             {
-                if (target == current.data)
+                if (target.Equals(current.key))
                 {
                     return current;
                 }
@@ -211,7 +217,7 @@ namespace AVL_tree
             if (current != null)
             {
                 InOrderDisplayTree(current.left);
-                Console.Write("({0}) ", current.data);
+                Console.Write("({0}) ", current.key);
                 InOrderDisplayTree(current.right);
             }
         }
